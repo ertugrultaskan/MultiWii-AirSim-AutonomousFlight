@@ -9,6 +9,8 @@
 #include "LCD.h"
 #include "Sensors.h"
 
+#if !defined(HIL_AIRSIM)
+
 static void Device_Mag_getADC();
 static void Baro_init();
 static void Mag_init();
@@ -1537,3 +1539,51 @@ void initSensors() {
     if (i2c_errors_count == 0) break; // no error during init => init ok
   }
 }
+
+#else
+
+int16_t hilAcc[3]  = {0, 0, ACC_1G};
+int16_t hilGyro[3] = {0, 0, 0};
+int16_t hilMag[3]  = {0, 0, 0};
+int32_t hilBaro    = 101325;
+uint8_t hilStarted = 0;
+
+void initSensors() {}
+
+void ACC_getADC() {
+  for (uint8_t axis = 0; axis < 3; axis++) imu.accADC[axis] = hilAcc[axis];
+  if (calibratingA > 0) calibratingA--;
+}
+
+void Gyro_getADC() {
+  for (uint8_t axis = 0; axis < 3; axis++) imu.gyroADC[axis] = hilGyro[axis];
+  if (calibratingG > 0) calibratingG--;
+}
+
+uint8_t Mag_getADC() {
+  static uint32_t t;
+  if (currentTime < t) return 0;
+  t = currentTime + 100000;
+  for (uint8_t axis = 0; axis < 3; axis++) imu.magADC[axis] = hilMag[axis];
+  f.CALIBRATE_MAG = 0;
+  return 1;
+}
+
+uint8_t Baro_update() {
+  static uint32_t t;
+  static int32_t baroHistTab[BARO_TAB_SIZE];
+  static uint8_t baroHistIdx;
+  if (currentTime < t) return 0;
+  t = currentTime + 25000;
+  baroPressure    = hilBaro;
+  baroTemperature = 1500;
+  uint8_t indexplus1 = (baroHistIdx + 1);
+  if (indexplus1 == BARO_TAB_SIZE) indexplus1 = 0;
+  baroHistTab[baroHistIdx] = baroPressure;
+  baroPressureSum += baroHistTab[baroHistIdx];
+  baroPressureSum -= baroHistTab[indexplus1];
+  baroHistIdx = indexplus1;
+  return 1;
+}
+
+#endif
