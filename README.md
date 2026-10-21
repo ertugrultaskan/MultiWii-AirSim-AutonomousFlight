@@ -22,4 +22,12 @@ Motor commands sent back to AirSim -> drone moves
 
 ## Status
 
-- [ ] Designing System Architecture
+- [x] Designing system architecture
+- [x] Configuring MultiWii for HIL simulation (`config.h`, `def.h`)
+- [x] Feeding simulated sensor data into MultiWii (`Sensors.cpp`)
+- [x] Extending the MSP protocol for data exchange (`Protocol.cpp`)
+- [x] Implementing the Python bridge between AirSim and Arduino (`CommunicationScript.py`)
+- [x] Adding a launcher script (`RunScript.bat`)
+- [x] End-to-end testing: the simulated drone flies in AirSim using MultiWii motor outputs
+
+**Project completed and working.**
