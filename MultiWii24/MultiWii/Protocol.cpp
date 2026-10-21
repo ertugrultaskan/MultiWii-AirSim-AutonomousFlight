@@ -72,6 +72,13 @@
 #define MSP_DEBUGMSG             253   //out message         debug string buffer
 #define MSP_DEBUG                254   //out message         debug1,debug2,debug3,debug4
 
+#define MSP_HIL_AIRSIM           230   //in+out message      AirSim sensor + RC in, motors + status out
+#if defined(HIL_AIRSIM)
+  extern int16_t hilAcc[3], hilGyro[3], hilMag[3];
+  extern int32_t hilBaro;
+  extern uint8_t hilStarted;
+#endif
+
 #ifdef DEBUGMSG
   #define DEBUG_MSG_BUFFER_SIZE 128
   static char debug_buf[DEBUG_MSG_BUFFER_SIZE];
@@ -506,6 +513,7 @@ void evaluateCommand(uint8_t c) {
       GPS_altitude = set_set_raw_gps.e;
       GPS_speed = set_set_raw_gps.f;
       GPS_update |= 2;              // New data signalisation to GPS functions
+      GPS_Frame = 1;
       break;
     case MSP_RAW_GPS:
       struct {
@@ -714,6 +722,35 @@ void evaluateCommand(uint8_t c) {
       writeParams(0);
       mspAck();
       break;
+    #if defined(HIL_AIRSIM)
+    case MSP_HIL_AIRSIM:
+      {
+      uint8_t i;
+      for (i = 0; i < 3; i++) hilAcc[i]  = read16();
+      for (i = 0; i < 3; i++) hilGyro[i] = read16();
+      for (i = 0; i < 3; i++) hilMag[i]  = read16();
+      hilBaro = read32();
+      for (i = 0; i < 8; i++) rcSerial[i] = read16();
+      rcSerialCount = 50;
+      if (!hilStarted) {
+        hilStarted   = 1;
+        calibratingG = 512;
+        calibratingB = 100;
+      }
+      headSerialReply(19);
+      for (i = 0; i < 4; i++) serialize16(motor[i]);
+      serialize8( f.ARMED | (f.BARO_MODE << 1) | (f.ANGLE_MODE << 2) | (f.GPS_FIX_HOME << 3)
+                | (f.ACC_CALIBRATED << 4) | ((calibratingG > 0) << 5) | (f.GPS_FIX << 6) );
+      serialize8(f.GPS_mode);
+      serialize8(NAV_state);
+      serialize8(NAV_error);
+      serialize8(mission_step.number);
+      serialize32(alt.EstAlt);
+      serialize16(att.heading);
+      tailSerialReply();
+      }
+      break;
+    #endif
     case MSP_DEBUG:
       s_struct((uint8_t*)&debug,8);
       break;
@@ -738,7 +775,7 @@ void evaluateCommand(uint8_t c) {
 void evaluateOtherData(uint8_t sr) {
   #ifndef SUPPRESS_OTHER_SERIAL_COMMANDS
     #if GPS
-      #if !defined(I2C_GPS)
+        #if defined(GPS_SERIAL)
         // on the GPS port, we must avoid interpreting incoming values for other commands because there is no
         // protocol protection as is with MSP commands
         // doing so with single chars would be prone to error.
