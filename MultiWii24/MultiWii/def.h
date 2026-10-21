@@ -1314,6 +1314,12 @@
   #undef INTERNAL_I2C_PULLUPS
 #endif
 
+#if defined(HIL_AIRSIM)
+  #define MPU6050      
+  #define HMC5883      
+  #define MS561101BA
+#endif
+
 #if defined(GY_521)
   #define MPU6050
   #define ACC_ORIENTATION(X, Y, Z)  {imu.accADC[ROLL]  = -X; imu.accADC[PITCH]  = -Y; imu.accADC[YAW]  =  Z;}
@@ -1666,7 +1672,7 @@
   #define BARO 0
 #endif
 
-#if defined(GPS_SERIAL)  || defined(I2C_GPS)
+#if defined(GPS_SERIAL)  || defined(I2C_GPS) || defined(HIL_AIRSIM)
   #define GPS 1
 #else
   #define GPS 0
@@ -1988,7 +1994,7 @@
   #error "for your protection: A32U4_4_HW_PWM_SERVOS was not tested with your coptertype"
 #endif
 
-#if GPS && !defined(NMEA) && !defined(UBLOX) && !defined(MTK_BINARY16) && !defined(MTK_BINARY19) && !defined(INIT_MTK_GPS) && !defined(I2C_GPS)
+#if GPS && !defined(NMEA) && !defined(UBLOX) && !defined(MTK_BINARY16) && !defined(MTK_BINARY19) && !defined(INIT_MTK_GPS) && !defined(I2C_GPS) && !defined(HIL_AIRSIM)
   #error "when using GPS you must specify the protocol NMEA, UBLOX..."
 #endif
 
