@@ -133,7 +133,8 @@
       //#define GY_85           // Chinese 9 DOF with  ITG3205 ADXL345 HMC5883L LLC
       //#define GY_86           // Chinese 10 DOF with  MPU6050 HMC5883L MS5611, LLC
       //#define GY_88 // Chinese 10 DOF with MPU6050 HMC5883L BMP085, LLC
-      #define GY_521          // Chinese 6  DOF with  MPU6050, LLC
+      //#define GY_521          // Chinese 6  DOF with  MPU6050, LLC
+      #define HIL_AIRSIM
       //#define INNOVWORKS_10DOF // with ITG3200, BMA180, HMC5883, BMP085 available here http://www.diymulticopter.com
       //#define INNOVWORKS_6DOF // with ITG3200, BMA180 available here http://www.diymulticopter.com
       //#define MultiWiiMega    // MEGA + MPU6050+HMC5883L+MS5611 available here http://www.diymulticopter.com
@@ -497,7 +498,7 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
 
   /******                Serial com speed    *********************************/
     /* This is the speed of the serial interfaces */
-    #define SERIAL0_COM_SPEED 115200
+    #define SERIAL0_COM_SPEED 250000
     #define SERIAL1_COM_SPEED 115200
     #define SERIAL2_COM_SPEED 115200
     #define SERIAL3_COM_SPEED 115200
@@ -703,7 +704,7 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
     #define GPS_LED_INDICATOR
 
    //Enables the MSP_WP command set , which is used by WinGUI for displaying an setting up navigation
-   //#define USE_MSP_WP
+   #define USE_MSP_WP
 
    // HOME position is reset at every arm, uncomment it to prohibit it (you can set home position with GyroCalibration)    
    //#define DONT_RESET_HOME_AT_ARM
@@ -721,7 +722,7 @@ At this moment you can use this function only with WinGUI 2.3 release. MultiWiiC
 Convert the degree+minutes into decimal degree by ==> degree+minutes*(1/60)
 Note the sign on declination it could be negative or positive (WEST or EAST)
 Also note, that maqgnetic declination changes with time, so recheck your value every 3-6 months */
-#define MAG_DECLINATION  4.02f   //(**)
+#define MAG_DECLINATION  0.0f   //(**)
 
 // Adds a forward predictive filterig to compensate gps lag. Code based on Jason Short's lead filter implementation
 #define GPS_LEAD_FILTER               //(**)
